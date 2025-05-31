@@ -18,9 +18,9 @@ jobs:
     - name: Extract Ngrok
       run: Expand-Archive ngrok.zip -DestinationPath ngrok
 
-    - name: Set Ngrok Authtoken
+    - name: Set Ngrok Authtoken (v2.x)
       run: |
-        ./ngrok/ngrok.exe config add-authtoken "${{ secrets.NGROK_AUTH_TOKEN }}"
+        ./ngrok/ngrok.exe authtoken "${{ secrets.NGROK_AUTH_TOKEN }}"
 
     - name: Enable RDP Access
       run: |
@@ -30,21 +30,21 @@ jobs:
         Copy-Item wallpaper.jpg D:\a\wallpaper.jpg
         Copy-Item wallpaper.bat D:\a\wallpaper.bat
 
-    - name: Start Ngrok Tunnel (TCP 3389)
+    - name: Start Ngrok TCP Tunnel (port 3389)
       run: |
         Start-Process -NoNewWindow -FilePath ./ngrok/ngrok.exe -ArgumentList "tcp 3389"
         Start-Sleep -Seconds 10
 
-    - name: Show Ngrok Tunnel Info
+    - name: Show Ngrok Public Address
       run: |
         $ngrokInfo = Invoke-RestMethod -Uri http://127.0.0.1:4040/api/tunnels
-        Write-Output "🔗 Ngrok RDP Address:"
+        Write-Output "🔗 RDP Tunnel:"
         $ngrokInfo.tunnels[0].public_url
 
     - name: Run Startup Script
       run: cmd /c start.bat
 
-    - name: Keep Alive
+    - name: Keep Workflow Alive
       run: |
         Invoke-WebRequest https://github.com/30dayscoding/rdp/raw/main/loop.ps1 -OutFile loop.ps1
         powershell -ExecutionPolicy Bypass -File .\loop.ps1
